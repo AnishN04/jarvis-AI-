@@ -1,0 +1,29 @@
+# Sample Knowledge Base
+
+## About Jarvis
+Jarvis is a personal AI assistant powered by LLaMA (Large Language Model Meta AI). It uses advanced natural language processing to understand and respond to user queries.
+
+## Capabilities
+- Natural language understanding and generation
+- Context-aware conversations
+- Knowledge retrieval from stored documents
+- Helpful responses to various questions
+
+## Technology Stack
+- **LLM**: LLaMA 2 running locally via Ollama
+- **Vector Database**: Pinecone for semantic search
+- **Backend**: Python Flask server
+- **Frontend**: Modern HTML/CSS/JavaScript chatbot UI
+
+## How It Works
+1. User sends a query through the chat interface
+2. The query is sent to the Flask backend
+3. Backend searches for relevant context in Pinecone vector database
+4. LLaMA generates a response using the query and retrieved context
+5. Response is displayed in the chat interface
+
+## Example Use Cases
+- Answer questions about stored knowledge
+- Provide information and explanations
+- Assist with various tasks
+- Have natural conversations
