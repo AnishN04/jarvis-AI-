@@ -1,65 +1,58 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-import torch
+from google import genai
+import os
 from typing import List
 
 class LLMHandler:
-    def __init__(self, model_name: str = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
-        """Initialize LLM handler using Hugging Face Transformers"""
+    def __init__(self, model_name: str = "gemini-2.5-flash"):
+        """
+        Initialize LLM handler using the new Google GenAI SDK
+        """
         self.model_name = model_name
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Loading model: {model_name}")
-        print(f"Using device: {self.device}")
+        self.api_key = os.getenv('GEMINI_API_KEY')
+        self.client = None
+        self.is_loaded = False
         
-        try:
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-                device_map="auto" if self.device == "cuda" else None,
-                low_cpu_mem_usage=True
-            )
-            
-            if self.device == "cpu":
-                self.model = self.model.to(self.device)
-            
-            self.pipe = pipeline(
-                "text-generation",
-                model=self.model,
-                tokenizer=self.tokenizer,
-                max_new_tokens=512,
-                temperature=0.7,
-                top_p=0.9,
-                do_sample=True
-            )
-            
-            self.is_loaded = True
-            print("Model loaded successfully!")
-            
-        except Exception as e:
-            print(f"Error loading model: {e}")
-            self.is_loaded = False
+        if self.api_key:
+            try:
+                self.client = genai.Client(api_key=self.api_key)
+                self.is_loaded = True
+                print(f"✓ Gemini model '{model_name}' initialized via new SDK")
+            except Exception as e:
+                print(f"✗ Error initializing Gemini SDK: {e}")
+        else:
+            print("⚠ Warning: GEMINI_API_KEY not found in environment")
     
     def check_connection(self) -> bool:
-        """Check if model is loaded and ready"""
+        """Check if Gemini API is configured and ready"""
         return self.is_loaded
     
     def generate_response(self, query: str, context: List[str] = None) -> str:
-        """Generate response using the LLM with optional context"""
+        """Generate response using Gemini with optional context"""
         
         if not self.is_loaded:
-            return "Error: Model not loaded. Please restart the server."
+            return "Error: Gemini API not configured. Please add GEMINI_API_KEY to your .env file."
         
+        # Build prompt with context if available
         if context and len(context) > 0:
             context_text = "\n\n".join(context)
-            prompt = f"Context: {context_text}\n\nQuestion: {query}\n\nAnswer:"
+            prompt = f"""
+You are Jarvis, a helpful AI assistant. Use the following context to answer the user's question.
+If the context doesn't contain the answer, use your general knowledge but mention it's not in the context.
+
+Context:
+{context_text}
+
+User Question: {query}
+Jarvis:"""
         else:
-            prompt = f"Question: {query}\n\nAnswer:"
+            prompt = f"User Question: {query}\nJarvis:"
         
         try:
-            result = self.pipe(prompt)
-            response = result[0]['generated_text']
-            response = response.replace(prompt, "").strip()
-            return response if response else "I'm not sure how to answer that."
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
+            return response.text
         except Exception as e:
             return f"Error generating response: {str(e)}"
     
@@ -68,7 +61,7 @@ class LLMHandler:
         if not self.check_connection():
             return {
                 "success": False,
-                "response": "Error: Model is not loaded. Please restart the server.",
+                "response": "Error: Gemini API not configured. Please check your .env file.",
                 "context_used": False
             }
         

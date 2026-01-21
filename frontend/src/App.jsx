@@ -5,7 +5,7 @@ import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import StatusIndicator from './components/StatusIndicator';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = ''; // Uses proxy from package.json in dev
 
 function App() {
     const [messages, setMessages] = useState([]);

@@ -1,6 +1,6 @@
 @echo off
 echo ================================================
-echo Jarvis AI Assistant - Complete Setup
+echo Jarvis AI Assistant - Complete Setup (Gemini)
 echo ================================================
 echo.
 
@@ -59,10 +59,11 @@ echo Creating .env file...
 if not exist .env (
     if exist .env.example (
         copy .env.example .env
-        echo .env file created. Please edit it and add your Pinecone API key.
+        echo .env file created. Please edit it and add your Gemini and Pinecone API keys.
     ) else (
         echo PINECONE_API_KEY=your_pinecone_api_key_here > .env
-        echo .env file created. Please edit it and add your Pinecone API key.
+        echo GEMINI_API_KEY=your_gemini_api_key_here >> .env
+        echo .env file created. Please edit it and add your Gemini and Pinecone API keys.
     )
 ) else (
     echo .env file already exists.
@@ -91,9 +92,9 @@ echo Setup Complete!
 echo ================================================
 echo.
 echo Next steps:
-echo 1. Install Ollama from https://ollama.ai/download
-echo 2. Run in cmd: ollama pull llama2
-echo 3. Edit backend\.env and add your Pinecone API key
+echo 1. Get a Gemini API key from https://aistudio.google.com/
+2. Get a Pinecone API key from https://www.pinecone.io/
+echo 3. Edit backend\.env and add your API keys
 echo 4. Run start.bat to launch the application
 echo.
 pause

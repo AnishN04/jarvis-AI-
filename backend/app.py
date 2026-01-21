@@ -12,18 +12,23 @@ app = Flask(__name__)
 CORS(app)
 
 # Initialize components
-llm = LLMHandler(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+llm = LLMHandler(model_name="gemini-2.5-flash")
 vector_store = None
 
 # Initialize Pinecone if API key is available
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
-if PINECONE_API_KEY:
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+if PINECONE_API_KEY and GEMINI_API_KEY:
     try:
         vector_store = VectorStore(api_key=PINECONE_API_KEY)
-        print("✓ Pinecone vector store initialized")
+        print("✓ Pinecone vector store initialized (using Gemini embeddings)")
     except Exception as e:
         print(f"⚠ Warning: Could not initialize Pinecone: {e}")
         print("  The assistant will work without knowledge retrieval.")
+elif not GEMINI_API_KEY:
+    print("⚠ Warning: GEMINI_API_KEY not found in environment")
+    print("  Please add GEMINI_API_KEY to your .env file to use the assistant.")
 else:
     print("⚠ Warning: PINECONE_API_KEY not found in environment")
     print("  The assistant will work without knowledge retrieval.")
